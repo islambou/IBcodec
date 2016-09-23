@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -6,29 +6,50 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
-namespace xClient.Utils.ScreenCapture
+/*
+Made BY : Bouderbala Islam
+Contact Info :
+ email : Bouderbalaislam [at] Gmail.com
+ skype : kanare007
+ facebook : fb.com/islambdrbl
+
+    The MIT License (MIT)
+    Copyright (c) 2016 AnguisCaptor
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
+namespace IBCodec
 {
     class IBcodec
     {
-        public static Bitmap Old;
-        byte[] _Old;
-        Bitmap New;
-        Stopwatch sw = new Stopwatch();
-
-        public List<Rectangle> Blocks;
-        public List<Stream> BlocksData;
-        public int quality;
+        Bitmap Old;  // the image we are going to use as a refrence
+        byte[] _Old; // byte array contains data of "Bitmap Old"
+        Bitmap New;  // the seconde image , which will be compared to the first one
+ 
+        public List<Rectangle> Blocks; // list of rectangles to be transmeted 
+        public List<Stream> BlocksData;// list of images as streams to be transmeted
+        public int quality;            // compression paremeter
 
         public void Code(Bitmap N, int q)
         {
-           // Console.WriteLine("-----------------------------");
-            sw.Start();
-    
-            sw.Stop();
-            sw.Reset();
+     
             BitmapData NewData = null;
             BitmapData OldData = null;
-            const int nbpp = 4;
+            const int nbpp = 4; // number of bytes per pixel
             New = N;
             int width = New.Width;
             int height = New.Height;
@@ -37,7 +58,7 @@ namespace xClient.Utils.ScreenCapture
             int top = height;
             int bottom = 0;
 
-            List<Rectangle> horizantals = new List<Rectangle>();
+            List<Rectangle> horizantals = new List<Rectangle>(); 
             Blocks = new List<Rectangle>();
             BlocksData = new List<Stream>();
 
@@ -85,6 +106,8 @@ namespace xClient.Utils.ScreenCapture
 
                             NativeMethods.memcpy(new IntPtr(ptr), scanOld0, (uint)(Old.Width * Old.Height * nbpp));
 
+
+                            // we are going to cutt the image in horizontal pieces each time we finde something has changed
                             for (int y = 0; y < New.Height; ++y)
                             {
                                 int offset = (y * Old.Width * nbpp);
@@ -96,7 +119,7 @@ namespace xClient.Utils.ScreenCapture
                                 }
 
 
-                                if ((y - lastY > 5 && lastY != -1) || (lastY == New.Height - 1 && top == 0))
+                                if ((y - lastY > 0 && lastY != -1) || (lastY == New.Height - 1 && top == 0))
                                 {
                                     horizantals.Add(new Rectangle(0, top, Old.Width, bottom - top + 1));
                                     top = height;
@@ -107,7 +130,7 @@ namespace xClient.Utils.ScreenCapture
 
                             }
 
-                            //get small rectangles
+                            // now we are going to cutt each horizantal piece vertically each time we finde something has changed 
                             for (int i = 0; i < horizantals.Count; i++)
                             {
                                 left = horizantals[i].X + horizantals[i].Width;
@@ -129,10 +152,9 @@ namespace xClient.Utils.ScreenCapture
                                         pPrev += strideOld;
                                     }
 
-                                    if ((x - lastX > 5 && lastX != -1) || (left == horizantals[i].X && right + 1 == horizantals[i].X + horizantals[i].Width + 1))
+                                    if ((x - lastX > 0 && lastX != -1) || (left == horizantals[i].X && right + 1 == horizantals[i].X + horizantals[i].Width + 1))
                                     {
                                         Blocks.Add(new Rectangle(left, horizantals[i].Top, right - left, horizantals[i].Top + horizantals[i].Height));
-                                       // Console.WriteLine(new Rectangle(left, horizantals[i].Top, right - left, horizantals[i].Top + horizantals[i].Height));
                                         left = horizantals[i].X + horizantals[i].Width;
                                         right = horizantals[i].X;
                                         lastX = -1;
@@ -166,6 +188,7 @@ namespace xClient.Utils.ScreenCapture
                         Old.UnlockBits(OldData);
                     }
                 }
+                // now we have a list of rectangles where changes has happened , so we are going to creat small images from each rectangle
                 for (int i = 0; i < Blocks.Count; i++)
                 {
                     try
@@ -193,7 +216,7 @@ namespace xClient.Utils.ScreenCapture
                   
 
                 }
-                Old = New;
+                Old = New; // now the seconde image becomes the refrence 
             }
 
         }
