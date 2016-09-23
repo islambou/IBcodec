@@ -7,7 +7,7 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
-namespace xClient.Utils.ScreenCapture
+namespace IBCodec
 {
     class CaptureScreen
     {
